@@ -27,17 +27,23 @@ jobs:
     - name: Generate code coverage report
       run: ./mvnw jacoco:report
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v3
-      with:
-        name: coverage-report
-        path: target/site/jacoco/
+    - name: Debug Jacoco XML (Optional)
+      run: |
+        echo "Debugging Jacoco XML"
+        cat target/site/jacoco/jacoco.xml
+        awk -F '\"' '/INSTRUCTION/ {print "missed="missed", covered="covered; for(i=1;i<=NF;i++) if($i=="missed=") missed=$(i+1); if($i=="covered=") covered=$(i+1)}' target/site/jacoco/jacoco.xml
 
     - name: Check code coverage
       run: |
-        COVERAGE=$(awk -F '\"' '/INSTRUCTION/ {for(i=1;i<=NF;i++) if($i=="missed=") missed=$(i+1); if($i=="covered=") covered=$(i+1)} END {print covered/(missed+covered)*100}' target/site/jacoco/jacoco.xml)
+        COVERAGE=$(awk -F '\"' '/INSTRUCTION/ {for(i=1;i<=NF;i++) if($i=="missed=") missed=$(i+1); if($i=="covered=") covered=$(i+1)} END {if(missed+covered > 0) print covered/(missed+covered)*100; else print 0}' target/site/jacoco/jacoco.xml)
         echo "Total coverage is $COVERAGE%"
         if (( $(echo "$COVERAGE < 60" | bc -l) )); then
           echo "Code coverage is below the required 60%"
           exit 1
         fi
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: target/site/jacoco/
