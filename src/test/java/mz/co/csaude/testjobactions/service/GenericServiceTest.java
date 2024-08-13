@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import mz.co.csaude.testjobactions.entity.GenericEntity;
 import mz.co.csaude.testjobactions.service.impl.GenericServiceImpl;
 
-public class TestGenericService {
+public class GenericServiceTest {
 
 	@Test
 	public void shouldCreateAnEntity() {
