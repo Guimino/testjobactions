@@ -35,10 +35,9 @@ jobs:
 
     - name: Check code coverage
       run: |
-        COVERAGE=$(grep -oP '(?<=<counter type="INSTRUCTION" missed="\d+" covered="\d+").*?(\d+)' target/site/jacoco/jacoco.xml)
+        COVERAGE=$(awk -F '\"' '/INSTRUCTION/ {for(i=1;i<=NF;i++) if($i=="missed=") missed=$(i+1); if($i=="covered=") covered=$(i+1)} END {print covered/(missed+covered)*100}' target/site/jacoco/jacoco.xml)
         echo "Total coverage is $COVERAGE%"
-        if (( $(echo "$COVERAGE < 60" |bc -l) )); then
+        if (( $(echo "$COVERAGE < 60" | bc -l) )); then
           echo "Code coverage is below the required 60%"
           exit 1
         fi
-
